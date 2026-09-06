@@ -1,7 +1,7 @@
 # The Organizer passcode: what it protects and how
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: 06
 
 ## Question
@@ -31,3 +31,30 @@ asset requests into billable Worker invocations which 429 when exhausted rather
 than degrading gracefully. The passcode must be checked in the API, which
 reinforces this ticket's question about hiding the UI versus protecting the
 endpoint.
+
+## Answer
+
+**One shared passcode, sent as a bearer header on every admin API call, compared
+server-side against a Wrangler secret.** No sessions, no tokens, no expiry.
+
+- **What it protects:** creating and editing Events and Lineups. Nothing else.
+  There are no Impressions on the server to steal (ADR-0002).
+- **Where it is checked:** in the API, on every mutating route — never merely by
+  hiding the admin UI. An admin that only hides buttons leaves the endpoints
+  open, which is the one genuinely unsafe option.
+- **Not** via `assets.run_worker_first`: on the free tier that converts free
+  asset requests into billable Worker invocations which 429 rather than
+  degrading (ticket 03).
+- **Storage:** the passcode lives in `localStorage` on the Organizer's phone and
+  is sent as `Authorization: Bearer <passcode>`. The secret itself is a Wrangler
+  secret, never in the repo.
+- **Rotation:** change the Wrangler secret and tell the group. Organizers
+  re-enter it once.
+- **Reading a Lineup is public and must be** — Tasters are unauthenticated. See
+  ticket 10 for what that means for the Event code.
+
+**The trade, stated plainly:** this stores a shared secret in cleartext in
+`localStorage`, which would be indefensible if it guarded anything real. It
+guards the ability to edit a wine list, and the worst case if it leaks is
+someone changing a vintage. Signed tokens with expiry were rejected as real
+session infrastructure for a threat model that does not justify it.
