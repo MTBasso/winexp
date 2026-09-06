@@ -4,12 +4,16 @@
 -- Codes use the Crockford alphabet: no I, L, O or U.
 -- Re-runnable: deletes itself first.
 
-DELETE FROM pours WHERE event_id IN ('seed-event-1', 'seed-event-2');
-DELETE FROM events WHERE id IN ('seed-event-1', 'seed-event-2');
+DELETE FROM pours WHERE event_id IN ('seed-event-1', 'seed-event-2', 'seed-event-3');
+DELETE FROM events WHERE id IN ('seed-event-1', 'seed-event-2', 'seed-event-3');
 
 INSERT INTO events (id, code, name, date) VALUES
   ('seed-event-1', 'TESTE1', 'Douro, casa da Ana', '6 de setembro'),
-  ('seed-event-2', 'TESTE2', 'Toscana, sítio do Paulo', '2 de agosto');
+  ('seed-event-2', 'TESTE2', 'Toscana, sítio do Paulo', '2 de agosto'),
+  -- A finished degustação to copy from: the most recent past Event, with a
+  -- full eight-wine Lineup, so the "copiar de uma anterior" flow has something
+  -- realistic to pull in.
+  ('seed-event-3', 'TESTE3', 'Serra Gaúcha, casa do Rafa', '30 de agosto');
 
 INSERT INTO pours (id, event_id, position, name, producer, vintage, grape, country) VALUES
   ('seed-p1', 'seed-event-1', 1, 'Brut Nature',        'Cave Geisse',      '2019', 'Chardonnay e Pinot Noir', 'Brasil'),
@@ -26,3 +30,13 @@ INSERT INTO pours (id, event_id, position, name, producer, vintage, grape, count
   ('seed-q3', 'seed-event-2', 3, 'Vernaccia',          'Panizzi',          '2022', 'Vernaccia',               'Itália'),
   ('seed-q4', 'seed-event-2', 4, 'Bolgheri Rosso',     'Le Macchiole',     '2021', 'Merlot e Cabernet',       'Itália'),
   ('seed-q5', 'seed-event-2', 5, 'Vin Santo',          'Avignonesi',       '2015', 'Trebbiano',               'Itália');
+
+INSERT INTO pours (id, event_id, position, name, producer, vintage, grape, country) VALUES
+  ('seed-r1', 'seed-event-3', 1, 'Espumante Nature',      'Casa Valduga',     '2020', 'Chardonnay e Pinot Noir', 'Brasil'),
+  ('seed-r2', 'seed-event-3', 2, 'Riesling Itálico',      'Salton',           '2023', 'Riesling Itálico',        'Brasil'),
+  ('seed-r3', 'seed-event-3', 3, 'Sauvignon Blanc',       'Pizzato',          '2022', 'Sauvignon Blanc',         'Brasil'),
+  ('seed-r4', 'seed-event-3', 4, 'Rosé de Malbec',        'Aurora',           '2023', 'Malbec',                  'Brasil'),
+  ('seed-r5', 'seed-event-3', 5, 'Pinot Noir Reserva',    'Miolo',            '2021', 'Pinot Noir',              'Brasil'),
+  ('seed-r6', 'seed-event-3', 6, 'Merlot Terroir',        'Lidio Carraro',    '2019', 'Merlot',                  'Brasil'),
+  ('seed-r7', 'seed-event-3', 7, 'Tannat Gran Reserva',   'Pizzato',          '2018', 'Tannat',                  'Brasil'),
+  ('seed-r8', 'seed-event-3', 8, 'Colheita Tardia',       'Casa Valduga',     '2021', 'Moscato',                 'Brasil');
