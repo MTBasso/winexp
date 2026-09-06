@@ -1,7 +1,7 @@
 # Implement the Event API in the Worker
 
 Type: task
-Status: open
+Status: claimed
 Blocked by: 15
 
 ## Question
