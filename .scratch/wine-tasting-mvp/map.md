@@ -116,16 +116,21 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
   inside the expanded row. **The QR exists from the moment the Event does** —
   the only reading consistent with Events having no states.
 
+- [The Organizer passcode](issues/09-organizer-passcode.md) — one shared
+  passcode as a bearer header on every mutating route, checked in the API and
+  never only in the UI, compared against a Wrangler secret. No sessions. The
+  cleartext-in-localStorage trade is accepted: it guards a wine list.
+- [The data model and Event code](issues/10-data-model.md) — six-character
+  Crockford base32 code (typeable, non-sequential); `events` + `pours` in D1 and
+  **no Impressions table**; four routes with the Lineup replaced wholesale; one
+  `localStorage` key per Event so a new Event starts from zero, migrating rather
+  than discarding, with each Impression carrying a copy of its Pour's details so
+  a Tasting is self-sufficient.
+
 ## Not yet specified
 
-- **Implementation of the Taster app** — graduates once the flow, rating screen
-  and Carousel tickets close.
-- **Implementation of the Organizer admin** — graduates once the Organizer flow
-  and Event lifecycle close.
 - **The pt-BR copy pass** across the whole app. Depends on the Axis and
   Descriptor wording, which is the bulk of it.
-- **Local Tasting state shape and its versioning** — what survives a locked
-  phone, a reload, and a redeploy mid-Event. Depends on the data model ticket.
 - **Testing Slide image generation** — whether it can be meaningfully tested at
   all, or only checked by hand on real phones. Depends on ticket 02. (The
   toolchain half of this graduated into ticket 11.)
@@ -134,8 +139,6 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
   not yet clear; it may be a line of copy or a real problem.
 - **Error and empty states** — a QR for an Event that does not exist, an Event
   with an empty Lineup, a Tasting with nothing rated yet.
-- **The printable QR sheet** — format, what else is on the page. Depends on the
-  Organizer flow.
 - **What "validated at one real Event" concretely means** — what is watched for
   on the night, what would count as failure.
 
