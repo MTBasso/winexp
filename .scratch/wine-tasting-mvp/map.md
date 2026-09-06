@@ -132,6 +132,10 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
   [the Organizer admin](issues/17-organizer-admin.md) are built and verified
   against a local D1. The admin can copy a past Lineup into a new Event — a
   plain copy with fresh ids, so the source is never touched.
+- [The Taster deck](issues/18-taster-deck.md) is built and deployed: a QR scan
+  lands on `/e/:code`, the Event is cached so the evening survives dead wifi,
+  and the local Tasting keeps Impressions whose Pour an Organizer removed.
+  **Live at https://wine-tasting.araraquarawinexp.workers.dev**
 
 ## Not yet specified
 
@@ -143,8 +147,6 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
 - **In-app browsers** — a QR scanned from inside another app lands in a WebView
   with no Web Share API at all. How far to go in detecting and escaping that is
   not yet clear; it may be a line of copy or a real problem.
-- **Error and empty states** — a QR for an Event that does not exist, an Event
-  with an empty Lineup, a Tasting with nothing rated yet.
 - **What "validated at one real Event" concretely means** — what is watched for
   on the night, what would count as failure.
 

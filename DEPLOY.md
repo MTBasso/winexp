@@ -31,6 +31,19 @@ Organizers enter it once per device at `/admin` and are never asked again. It
 protects writes, not secrets: there is nothing confidential stored (ADR-0002),
 but without it anyone who finds `/admin` could wipe a wine list during an Event.
 
+## Gotcha: changing `database_id` resets your local database
+
+Miniflare keys the **local** D1 by `database_id`, not by binding name. Changing
+that id in `wrangler.jsonc` silently points local dev at a fresh, empty
+database, and every `/api/*` call starts returning 500 with no obvious cause.
+
+The fix is not a rollback, it is a re-apply:
+
+```fish
+npm run migrate
+npm run seed
+```
+
 ## Commands
 
 | command | does |
