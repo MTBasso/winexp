@@ -2,6 +2,9 @@ import { ShareProbe } from "./devtools/ShareProbe";
 import { PrototypeTaster } from "./prototypes/taster/PrototypeTaster";
 import { PrototypeCarousel } from "./prototypes/carousel/PrototypeCarousel";
 import { PrototypeOrganizer } from "./prototypes/organizer/PrototypeOrganizer";
+import { PasscodeGate } from "./organizer/PasscodeGate";
+import { OrganizerAdmin } from "./organizer/OrganizerAdmin";
+import { TasterApp } from "./taster/TasterApp";
 
 /**
  * The Taster flow is not built yet — it is decided by tickets 04, 07 and 08 on
@@ -14,6 +17,19 @@ export function App() {
   if (path === "/prototype/taster") return <PrototypeTaster />;
   if (path === "/prototype/carousel") return <PrototypeCarousel />;
   if (path === "/prototype/organizer") return <PrototypeOrganizer />;
+
+  // Where a QR scan lands (tickets 04, 07, 18).
+  const scanned = path.match(/^\/e\/([^/]+)\/?$/);
+  if (scanned) return <TasterApp rawCode={scanned[1]!} />;
+
+  // The real Organizer admin (tickets 06, 09, 17).
+  if (path === "/admin") {
+    return (
+      <PasscodeGate>
+        <OrganizerAdmin />
+      </PasscodeGate>
+    );
+  }
 
   return (
     <main
@@ -37,6 +53,12 @@ export function App() {
         </a>
         <a href="/prototype/carousel" style={{ color: "#7f1d1d", fontWeight: 600 }}>
           Carousel prototype (ticket 08) →
+        </a>
+        <a href="/e/TESTE1" style={{ color: "#7f1d1d", fontWeight: 700 }}>
+          Degustação de teste (TESTE1) →
+        </a>
+        <a href="/admin" style={{ color: "#7f1d1d", fontWeight: 700 }}>
+          Área dos organizadores →
         </a>
         <a href="/prototype/organizer" style={{ color: "#7f1d1d", fontWeight: 600 }}>
           Organizer flow prototype (ticket 06) →

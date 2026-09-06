@@ -127,6 +127,20 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
   than discarding, with each Impression carrying a copy of its Pour's details so
   a Tasting is self-sufficient.
 
+- Implementation: [domain and schema](issues/15-domain-and-schema.md),
+  [the Event API](issues/16-event-api.md) and
+  [the Organizer admin](issues/17-organizer-admin.md) are built and verified
+  against a local D1. The admin can copy a past Lineup into a new Event — a
+  plain copy with fresh ids, so the source is never touched.
+- [The Taster deck](issues/18-taster-deck.md) is built and deployed: a QR scan
+  lands on `/e/:code`, the Event is cached so the evening survives dead wifi,
+  and the local Tasting keeps Impressions whose Pour an Organizer removed.
+  **Live at https://wine-tasting.araraquarawinexp.workers.dev**
+- [The Carousel and the share hand-off](issues/19-carousel-rendering.md) — Slides
+  captured with snapdom at `dpr: 1`, pre-rendered before the control enables,
+  handed to `navigator.share({ files })` with per-Slide downloads as the
+  fallback. The flow is complete end to end.
+
 ## Not yet specified
 
 - **The pt-BR copy pass** across the whole app. Depends on the Axis and
@@ -137,8 +151,6 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
 - **In-app browsers** — a QR scanned from inside another app lands in a WebView
   with no Web Share API at all. How far to go in detecting and escaping that is
   not yet clear; it may be a line of copy or a real problem.
-- **Error and empty states** — a QR for an Event that does not exist, an Event
-  with an empty Lineup, a Tasting with nothing rated yet.
 - **What "validated at one real Event" concretely means** — what is watched for
   on the night, what would count as failure.
 

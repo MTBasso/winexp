@@ -58,3 +58,17 @@ server-side against a Wrangler secret.** No sessions, no tokens, no expiry.
 guards the ability to edit a wine list, and the worst case if it leaks is
 someone changing a vintage. Signed tokens with expiry were rejected as real
 session infrastructure for a threat model that does not justify it.
+
+## Amendment — 2026-09-06
+
+The passcode was questioned on the grounds that the app holds nothing sensitive.
+That is true and is exactly ADR-0002 — but it is an argument about
+*confidentiality*, and the passcode protects *writes*. With the mutating routes
+open, anyone who finds the admin can edit or wipe any Lineup, including during a
+live Event, and the Event codes are printed on the tables.
+
+**Resolution: the passcode stays, and becomes invisible.** It is entered once,
+kept in `localStorage`, and never asked for again on that device, so an
+Organizer experiences no login. This keeps the write protection at zero
+friction. Removing it entirely remains a one-line change in
+`worker/index.ts` if that is preferred.
