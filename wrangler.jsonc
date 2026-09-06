@@ -11,10 +11,15 @@
     // requests into billable invocations that 429. See ADR-0001.
     "not_found_handling": "single-page-application"
   },
-  // D1 is deliberately not bound yet. Nothing reads it until ticket 10 settles
-  // the data model, and a placeholder database_id breaks `wrangler deploy` —
-  // which has to work now, because the ticket-13 share probe needs HTTPS to be
-  // a secure context at all (navigator.share is undefined without one).
-  // When ticket 10 lands:  wrangler d1 create wine-tasting
-  // then add the binding here and re-run `npm run cf-typegen`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "wine-tasting",
+      // Local dev works with this placeholder — miniflare keys its local D1 off
+      // the binding name. `wrangler deploy` does NOT: run
+      //   wrangler d1 create wine-tasting
+      // and paste the real id here first.
+      "database_id": "local-only-run-wrangler-d1-create-before-deploy"
+    }
+  ]
 }
