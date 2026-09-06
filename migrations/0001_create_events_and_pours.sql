@@ -1,0 +1,11 @@
+-- Placeholder. The real schema is decided by ticket 10 (data model) and depends
+-- on ticket 05 (Event lifecycle). Committing a guess here would answer those
+-- tickets by accident, so this migration intentionally creates nothing yet.
+--
+-- Shape already settled by charting, for whoever writes it:
+--   * Events are first-class (two may run at once), addressed by an Event code
+--     carried in the QR URL.
+--   * A Pour carries its own wine details — no reusable Wine catalogue.
+--   * There is no table for Impressions. That absence is ADR-0002, not an
+--     oversight.
+SELECT 1;

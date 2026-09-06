@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "wine-tasting",
+  "main": "./worker/index.ts",
+  // Past 2025-04-01, so navigation requests are served straight from static
+  // assets and never reach the Worker. Only /api/* costs an invocation.
+  "compatibility_date": "2026-09-06",
+  "assets": {
+    // Do NOT set "directory" — the Vite plugin fills it from the client build.
+    // Do NOT set "run_worker_first" — on the free tier it turns free asset
+    // requests into billable invocations that 429. See ADR-0001.
+    "not_found_handling": "single-page-application"
+  },
+  // D1 is deliberately not bound yet. Nothing reads it until ticket 10 settles
+  // the data model, and a placeholder database_id breaks `wrangler deploy` —
+  // which has to work now, because the ticket-13 share probe needs HTTPS to be
+  // a secure context at all (navigator.share is undefined without one).
+  // When ticket 10 lands:  wrangler d1 create wine-tasting
+  // then add the binding here and re-run `npm run cf-typegen`.
+}
