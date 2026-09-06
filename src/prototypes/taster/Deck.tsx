@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { STUB_EVENT, type StubPour } from "./stubData";
 import { EMPTY_IMPRESSION, isStarted, type Impression } from "./rating/content";
-import { RatingBinary } from "./rating/variants";
+import { RatingBinary } from "./rating/RatingBinary";
 import { wineSub } from "./shared";
 
 type Impressions = Readonly<Record<string, Impression>>;
