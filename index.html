@@ -16,6 +16,25 @@
       body {
         margin: 0;
       }
+      /* Printing exists to put the QR sheet on a table. */
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        .qr-sheet,
+        .qr-sheet * {
+          visibility: visible;
+        }
+        .qr-sheet {
+          position: absolute;
+          inset: 0 auto auto 0;
+          width: 100%;
+          border: 0 !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+      }
     </style>
   </head>
   <body>

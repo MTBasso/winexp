@@ -127,6 +127,12 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
   than discarding, with each Impression carrying a copy of its Pour's details so
   a Tasting is self-sufficient.
 
+- Implementation: [domain and schema](issues/15-domain-and-schema.md),
+  [the Event API](issues/16-event-api.md) and
+  [the Organizer admin](issues/17-organizer-admin.md) are built and verified
+  against a local D1. The admin can copy a past Lineup into a new Event — a
+  plain copy with fresh ids, so the source is never touched.
+
 ## Not yet specified
 
 - **The pt-BR copy pass** across the whole app. Depends on the Axis and
