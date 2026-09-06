@@ -15,11 +15,7 @@
     {
       "binding": "DB",
       "database_name": "wine-tasting",
-      // Local dev works with this placeholder — miniflare keys its local D1 off
-      // the binding name. `wrangler deploy` does NOT: run
-      //   wrangler d1 create wine-tasting
-      // and paste the real id here first.
-      "database_id": "local-only-run-wrangler-d1-create-before-deploy"
+      "database_id": "d190723b-ee84-4fdb-8e0d-a4c3decf612b"
     }
   ]
 }

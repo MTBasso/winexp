@@ -12,7 +12,9 @@
     "typecheck": "tsc -b --noEmit",
     "cf-typegen": "wrangler types",
     "seed": "wrangler d1 execute wine-tasting --local --file scripts/seed.sql",
-    "migrate": "wrangler d1 migrations apply wine-tasting --local"
+    "migrate": "wrangler d1 migrations apply wine-tasting --local",
+    "seed:remote": "wrangler d1 execute wine-tasting --remote --file scripts/seed.sql",
+    "migrate:remote": "wrangler d1 migrations apply wine-tasting --remote"
   },
   "dependencies": {
     "qrcode": "^1.5.4",
