@@ -9,6 +9,7 @@ import { useState } from "react";
 import type { Event, Impression, Pour, Tasting } from "../domain/types";
 import { isStarted, ratedCount } from "./tasting";
 import { RatingSheet, type RatingChange } from "./RatingSheet";
+import { ShareCard } from "../carousel/ShareCard";
 
 export function Deck({
   event, tasting, onName, onRate,
@@ -32,7 +33,6 @@ export function Deck({
 
   const total = lineup.length + 2;
   const pour = card >= 1 && card <= lineup.length ? lineup[card - 1] : undefined;
-  const done = ratedCount(tasting);
   const impression: Impression | undefined = rating ? tasting.impressions[rating.id] : undefined;
 
   return (
@@ -104,26 +104,7 @@ export function Deck({
           </div>
         )}
 
-        {card === total - 1 && (
-          <div style={{ width: "100%", maxWidth: 330, textAlign: "center" }}>
-            <h2 style={{ fontSize: 24, margin: "0 0 10px" }}>
-              {done === 0 ? "Nenhum vinho avaliado ainda" : `${done} ${done === 1 ? "vinho avaliado" : "vinhos avaliados"}`}
-            </h2>
-            <p style={{ fontSize: 14, color: "rgba(250,250,249,.6)", lineHeight: 1.5 }}>
-              {done === 0
-                ? "Volte a qualquer momento — nada se perde."
-                : tasting.firstName
-                  ? `Suas imagens vão sair assinadas com “${tasting.firstName}”.`
-                  : "Suas imagens vão sair sem assinatura."}
-            </p>
-            <button disabled style={{ ...lightBtn, marginTop: 22, background: "rgba(250,250,249,.14)", color: "rgba(250,250,249,.5)" }}>
-              Salvar imagens
-            </button>
-            <div style={{ fontSize: 11.5, color: "rgba(250,250,249,.4)", marginTop: 10, lineHeight: 1.5 }}>
-              O carrossel ainda está sendo construído (ticket 19).
-            </div>
-          </div>
-        )}
+        {card === total - 1 && <ShareCard event={event} tasting={tasting} />}
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", padding: "0 20px 32px" }}>

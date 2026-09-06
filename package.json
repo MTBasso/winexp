@@ -17,6 +17,7 @@
     "migrate:remote": "wrangler d1 migrations apply wine-tasting --remote"
   },
   "dependencies": {
+    "@zumer/snapdom": "^2.24.15",
     "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",

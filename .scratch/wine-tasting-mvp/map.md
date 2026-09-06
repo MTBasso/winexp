@@ -136,6 +136,10 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
   lands on `/e/:code`, the Event is cached so the evening survives dead wifi,
   and the local Tasting keeps Impressions whose Pour an Organizer removed.
   **Live at https://wine-tasting.araraquarawinexp.workers.dev**
+- [The Carousel and the share hand-off](issues/19-carousel-rendering.md) — Slides
+  captured with snapdom at `dpr: 1`, pre-rendered before the control enables,
+  handed to `navigator.share({ files })` with per-Slide downloads as the
+  fallback. The flow is complete end to end.
 
 ## Not yet specified
 

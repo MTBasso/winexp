@@ -1,7 +1,7 @@
 # The share hand-off: from rendered Slides to a posted Carousel
 
 Type: prototype
-Status: open
+Status: resolved
 Blocked by: 08, 13
 
 ## Question
@@ -28,3 +28,21 @@ Prototype it, settling:
   spent, so recovery needs a fresh tap and the UI must invite one.
 - Whether anything encourages the Taster to tag the group, and how that survives
   the fact that we never see the post.
+
+## Answer
+
+Folded into ticket 19 rather than prototyped separately — by the time it came
+up the deck was real, so the hand-off could be built in place instead of mocked.
+
+- **While rendering:** the control is disabled and counts *"Preparando suas
+  imagens… 3/8"*, so the ADR-0004 wait is visible rather than mysterious.
+- **The control says "Salvar N imagens", not "Compartilhar".** ADR-0003: this is
+  a save. Promising Instagram would be a promise we cannot keep.
+- **After a successful share** a short pt-BR instruction appears — open
+  Instagram, tap +, pick the N images in order, publish.
+- **No Web Share** (Android WebView, in-app browsers): the numbered per-Slide
+  download links are shown instead, with copy explaining why.
+- **A failed share** shows the download links alongside an invitation to tap
+  again — the activation is spent, so recovery needs a fresh gesture and an
+  automatic retry would always fail.
+- **Dismissing the sheet is not an error.** `AbortError` is swallowed silently.
