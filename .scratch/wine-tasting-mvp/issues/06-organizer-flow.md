@@ -1,7 +1,7 @@
 # The Organizer flow: create an Event, build a Lineup, print the QR
 
 Type: prototype
-Status: claimed
+Status: resolved
 Blocked by: 05
 
 ## Question
@@ -59,3 +59,39 @@ What the variants really put to you:
   calmest on a phone; A is fastest for someone who already has the list.
 - Whether reordering matters. Only A has explicit reorder arrows; B and C rely
   on entry order.
+
+## Answer
+
+**Variant C — "lista viva".** The Event name and date are edited in place in the
+header, the Lineup is the page, and tapping a row expands it for editing. No
+form to fill, no wizard to complete.
+
+The deciding argument was consistency with ticket 05 rather than taste: **the QR
+exists from the moment the Event does.** A and B both gated it behind a *Gerar
+QR* button, which quietly reintroduces the publish step that ticket 05 removed —
+and "why is my QR blank" at a live Event is the failure that decision existed to
+prevent. C treats an Event as live from creation, which is what the model
+actually says.
+
+Settled with it:
+
+- **Pour fields:** nome do vinho, produtor, safra, país, uva — denormalised onto
+  the Pour, no catalogue, per the charting decision.
+- **A Pour is usable with just a name or a producer.** Everything else is
+  optional, because an Organizer typing at the venue should never be blocked by
+  a missing grape.
+- **Reordering is in.** Only the rejected form variant had it, and dropping it
+  would have been an accident rather than a decision — wines get resequenced
+  late. It lives as ↑/↓ inside the expanded row rather than as permanent
+  chrome.
+- **Editing is immediate and always available**, matching ticket 05: Lineups
+  stay editable during the Event.
+- **The printable sheet** carries the Event name, date, QR, *"Aponte a câmera
+  para avaliar os vinhos"* and one line promising the Taster leaves with their
+  impressions. The QR pattern in the prototype is a deterministic stand-in; the
+  real encoder is an implementation detail.
+
+Not adopted: A's single long form (fastest for someone with the list already
+written, but the QR gate was wrong) and B's wizard (calmest for phone typing,
+but it cannot be finished out of order, which fights an Organizer who is
+interrupted — a near certainty an hour before service).

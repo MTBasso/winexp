@@ -111,6 +111,11 @@ for `wayfinder:research` tickets; `/tdd` once implementation tickets exist.
   **works.** Both engines confirmed; the share hand-off is no longer a risk to
   the Destination on either platform.
 
+- [The Organizer flow](issues/06-organizer-flow.md) — **"lista viva"**: name and
+  date edited in place, the Lineup is the page, rows expand to edit, reordering
+  inside the expanded row. **The QR exists from the moment the Event does** —
+  the only reading consistent with Events having no states.
+
 ## Not yet specified
 
 - **Implementation of the Taster app** — graduates once the flow, rating screen

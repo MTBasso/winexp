@@ -1,15 +1,17 @@
 /**
- * PROTOTYPE — C: Lista viva. The Lineup as it will be seen, edited in place.
- * No form, no wizard — tap a line and change it, like editing a document.
+ * The Organizer admin settled by ticket 06: "lista viva".
+ *
+ * No form and no wizard — the Event name and date are edited in place, the
+ * Lineup is the page, and tapping a row expands it. The QR exists from the
+ * moment the Event does, which is the only reading consistent with ticket 05's
+ * decision that an Event has no states and therefore no publish step.
  */
 import { useState } from "react";
 import { O } from "./parts";
 import { FakeQr, QrSheet } from "./QrSheet";
 import { emptyPour, isPourUsable, newEvent, PAST_EVENTS, type DraftEvent, type DraftPour } from "./model";
 
-export const NAME_LIVE = "Lista viva — edita no lugar";
-
-export function VariantLive() {
+export function OrganizerAdmin() {
   const [ev, setEv] = useState<DraftEvent>(() => ({ ...newEvent(), pours: [] }));
   const [editing, setEditing] = useState<string | null>(null);
   const [sheet, setSheet] = useState(false);
@@ -17,6 +19,18 @@ export function VariantLive() {
 
   const patch = (id: string, p: Partial<DraftPour>) =>
     setEv((prev) => ({ ...prev, pours: prev.pours.map((x) => (x.id === id ? { ...x, ...p } : x)) }));
+
+  const move = (from: number, delta: number) =>
+    setEv((prev) => {
+      const pours = [...prev.pours];
+      const to = from + delta;
+      const moved = pours[from];
+      const target = pours[to];
+      if (!moved || !target) return prev;
+      pours[from] = target;
+      pours[to] = moved;
+      return { ...prev, pours };
+    });
 
   const add = () => {
     const p = emptyPour();
@@ -89,10 +103,15 @@ export function VariantLive() {
                         style={{ width: "100%", padding: "10px 11px", fontSize: 14.5, borderRadius: 8, border: `1px solid ${O.line}` }} />
                     </label>
                   ))}
-                  <button onClick={() => { setEv((prev) => ({ ...prev, pours: prev.pours.filter((x) => x.id !== p.id) })); setEditing(null); }}
-                    style={{ gridColumn: "1 / -1", padding: 11, borderRadius: 9, border: 0, background: "transparent", color: "#b91c1c", fontSize: 13 }}>
-                    remover este vinho
-                  </button>
+                  <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                    <button disabled={i === 0} onClick={() => move(i, -1)} style={moveBtn(i === 0)}>↑ subir</button>
+                    <button disabled={i === ev.pours.length - 1} onClick={() => move(i, 1)} style={moveBtn(i === ev.pours.length - 1)}>↓ descer</button>
+                    <span style={{ flex: 1 }} />
+                    <button onClick={() => { setEv((prev) => ({ ...prev, pours: prev.pours.filter((x) => x.id !== p.id) })); setEditing(null); }}
+                      style={{ padding: "9px 12px", borderRadius: 9, border: 0, background: "transparent", color: "#b91c1c", fontSize: 13 }}>
+                      remover
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -133,3 +152,9 @@ export function VariantLive() {
     </div>
   );
 }
+
+const moveBtn = (disabled: boolean): React.CSSProperties => ({
+  padding: "9px 12px", borderRadius: 9, fontSize: 13,
+  border: `1px solid ${O.line}`, background: "#fff",
+  color: disabled ? "#d6d3d1" : O.mut,
+});
