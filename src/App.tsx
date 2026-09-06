@@ -1,6 +1,7 @@
 import { ShareProbe } from "./devtools/ShareProbe";
 import { PrototypeTaster } from "./prototypes/taster/PrototypeTaster";
 import { PrototypeCarousel } from "./prototypes/carousel/PrototypeCarousel";
+import { PrototypeOrganizer } from "./prototypes/organizer/PrototypeOrganizer";
 
 /**
  * The Taster flow is not built yet — it is decided by tickets 04, 07 and 08 on
@@ -12,6 +13,7 @@ export function App() {
   if (path === "/share-probe") return <ShareProbe />;
   if (path === "/prototype/taster") return <PrototypeTaster />;
   if (path === "/prototype/carousel") return <PrototypeCarousel />;
+  if (path === "/prototype/organizer") return <PrototypeOrganizer />;
 
   return (
     <main
@@ -35,6 +37,9 @@ export function App() {
         </a>
         <a href="/prototype/carousel" style={{ color: "#7f1d1d", fontWeight: 600 }}>
           Carousel prototype (ticket 08) →
+        </a>
+        <a href="/prototype/organizer" style={{ color: "#7f1d1d", fontWeight: 600 }}>
+          Organizer flow prototype (ticket 06) →
         </a>
         <a href="/share-probe" style={{ color: "#7f1d1d", fontWeight: 600 }}>
           Share probe (ticket 13) →
