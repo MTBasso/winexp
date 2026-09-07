@@ -1,28 +1,22 @@
-import { ShareProbe } from "./devtools/ShareProbe";
-import { PrototypeTaster } from "./prototypes/taster/PrototypeTaster";
-import { PrototypeCarousel } from "./prototypes/carousel/PrototypeCarousel";
-import { PrototypeOrganizer } from "./prototypes/organizer/PrototypeOrganizer";
 import { PasscodeGate } from "./organizer/PasscodeGate";
 import { OrganizerAdmin } from "./organizer/OrganizerAdmin";
 import { TasterApp } from "./taster/TasterApp";
 
 /**
- * The Taster flow is not built yet — it is decided by tickets 04, 07 and 08 on
- * the wayfinder map, and inventing it here would be answering those tickets by
- * accident. Until then this shell exists to carry the ticket-13 share probe.
+ * Two surfaces: where a QR scan lands, and the Organizer admin.
+ *
+ * The throwaway prototypes that settled tickets 04, 06, 07, 08 and 13 are not
+ * here — they were folded into production code, and the full sets are preserved
+ * on the prototype/* branches.
  */
 export function App() {
   const path = window.location.pathname;
-  if (path === "/share-probe") return <ShareProbe />;
-  if (path === "/prototype/taster") return <PrototypeTaster />;
-  if (path === "/prototype/carousel") return <PrototypeCarousel />;
-  if (path === "/prototype/organizer") return <PrototypeOrganizer />;
 
   // Where a QR scan lands (tickets 04, 07, 18).
   const scanned = path.match(/^\/e\/([^/]+)\/?$/);
   if (scanned) return <TasterApp rawCode={scanned[1]!} />;
 
-  // The real Organizer admin (tickets 06, 09, 17).
+  // The Organizer admin (tickets 06, 09, 17).
   if (path === "/admin") {
     return (
       <PasscodeGate>
@@ -31,42 +25,32 @@ export function App() {
     );
   }
 
+  return <Landing />;
+}
+
+function Landing() {
   return (
-    <main
-      style={{
-        maxWidth: 460,
-        margin: "0 auto",
-        padding: "48px 20px",
-        fontFamily: "system-ui, sans-serif",
-        color: "#1c1917",
-        lineHeight: 1.55,
-      }}
-    >
-      <h1 style={{ fontSize: 22, marginBottom: 10 }}>Degustação</h1>
-      <p style={{ color: "#57534e", fontSize: 15 }}>
-        Scaffold only. The Taster flow is still being decided — see{" "}
-        <code>.scratch/wine-tasting-mvp/map.md</code>.
+    <main style={page}>
+      <div style={{ fontSize: 46, marginBottom: 14 }}>🍷</div>
+      <h1 style={{ fontSize: 26, margin: "0 0 12px", color: "#1c1917" }}>Degustação</h1>
+      <p style={{ color: "#57534e", fontSize: 15.5, lineHeight: 1.6, margin: "0 0 28px" }}>
+        Escaneie o QR code na sua mesa para avaliar os vinhos da noite e sair
+        com suas impressões prontas para postar.
       </p>
-      <p style={{ marginTop: 20, display: "grid", gap: 10 }}>
-        <a href="/prototype/taster" style={{ color: "#7f1d1d", fontWeight: 600 }}>
-          Taster flow prototype (ticket 04) →
-        </a>
-        <a href="/prototype/carousel" style={{ color: "#7f1d1d", fontWeight: 600 }}>
-          Carousel prototype (ticket 08) →
-        </a>
-        <a href="/e/TESTE1" style={{ color: "#7f1d1d", fontWeight: 700 }}>
-          Degustação de teste (TESTE1) →
-        </a>
-        <a href="/admin" style={{ color: "#7f1d1d", fontWeight: 700 }}>
-          Área dos organizadores →
-        </a>
-        <a href="/prototype/organizer" style={{ color: "#7f1d1d", fontWeight: 600 }}>
-          Organizer flow prototype (ticket 06) →
-        </a>
-        <a href="/share-probe" style={{ color: "#7f1d1d", fontWeight: 600 }}>
-          Share probe (ticket 13) →
-        </a>
+      <p style={{ color: "#78716c", fontSize: 13.5, lineHeight: 1.6, margin: 0 }}>
+        Sem cadastro e sem senha. Suas avaliações ficam só no seu aparelho.
       </p>
+      <a href="/admin" style={adminLink}>Sou organizador</a>
     </main>
   );
 }
+
+const page: React.CSSProperties = {
+  minHeight: "100vh", maxWidth: 460, margin: "0 auto",
+  padding: "72px 24px 40px", fontFamily: "system-ui, sans-serif",
+  textAlign: "center", background: "#faf7f2",
+};
+const adminLink: React.CSSProperties = {
+  display: "inline-block", marginTop: 40, fontSize: 13, color: "#a8544f",
+  textDecoration: "none", borderBottom: "1px solid rgba(168,84,79,.35)", paddingBottom: 2,
+};
