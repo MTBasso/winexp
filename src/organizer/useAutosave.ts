@@ -16,12 +16,15 @@ export type SaveState =
 export function useAutosave<T>(
   save: (value: T) => Promise<unknown>,
   delayMs = 800,
-): { state: SaveState; schedule: (value: T) => void; flush: () => void } {
+): { state: SaveState; schedule: (value: T) => void; flush: () => Promise<void> } {
   const [state, setState] = useState<SaveState>({ status: "idle" });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pending = useRef<T | null>(null);
   const saveRef = useRef(save);
   saveRef.current = save;
+  // Tracks whatever run() is currently in flight, so flush() can wait on a
+  // save the debounce timer already kicked off, not only one it starts itself.
+  const inFlight = useRef<Promise<void> | null>(null);
 
   const run = useCallback(async () => {
     if (pending.current === null) return;
@@ -45,14 +48,27 @@ export function useAutosave<T>(
     (value: T) => {
       pending.current = value;
       if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(run, delayMs);
+      timer.current = setTimeout(() => {
+        inFlight.current = run();
+      }, delayMs);
     },
     [run, delayMs],
   );
 
-  const flush = useCallback(() => {
-    if (timer.current) clearTimeout(timer.current);
-    void run();
+  // Resolves once this value — and anything already saving — is safely
+  // persisted: waits out a save already in progress, runs a still-pending
+  // one immediately, or does nothing if there's nothing to save.
+  const flush = useCallback(async () => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+    if (pending.current !== null) {
+      inFlight.current = run();
+    }
+    if (inFlight.current) {
+      await inFlight.current;
+    }
   }, [run]);
 
   useEffect(() => () => {
