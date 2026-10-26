@@ -17,5 +17,8 @@
       "database_name": "wine-tasting",
       "database_id": "d190723b-ee84-4fdb-8e0d-a4c3decf612b"
     }
+  ],
+  "r2_buckets": [
+    { "binding": "BOTTLE_IMAGES", "bucket_name": "wine-tasting-bottle-images" }
   ]
 }

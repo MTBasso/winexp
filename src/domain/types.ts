@@ -17,11 +17,17 @@ export interface Event {
   readonly lineup: readonly Pour[];
 }
 
+/** Tipo: a fact about the wine, set once by the Organizer — not a Taster Impression axis. */
+export type Tipo = "Tinto" | "Branco" | "Rosé" | "Espumante" | "Fortificado" | "Outro";
+
 /**
  * One wine's place in one Event's Lineup. Carries its own wine details — there
  * is no reusable Wine catalogue, by decision.
  */
 export interface Pour {
+  /** Client-generated once via crypto.randomUUID() when the Pour is first
+   * added, and kept stable across every subsequent putLineup call — this is
+   * what lets a bottle image (keyed by Pour id) survive unrelated edits. */
   readonly id: string;
   readonly position: number;
   readonly name: string;
@@ -29,6 +35,9 @@ export interface Pour {
   readonly vintage: string;
   readonly grape: string;
   readonly country: string;
+  readonly tipo: Tipo;
+  /** Server-computed; null until a bottle photo has been uploaded for this Pour. */
+  readonly imageUrl: string | null;
 }
 
 /** The wine details copied onto an Impression, so a Tasting is self-sufficient. */
@@ -42,6 +51,13 @@ export interface Axis {
   readonly high: string;
 }
 
+/**
+ * The 5-point "O que achei" scale. A sibling field on Impression, not folded
+ * into `ratings` — it supersedes the old `gostei` Axis; the remaining Axes
+ * (`corpo`/`doce`/`denovo`) are not what this re-asks.
+ */
+export type AcheiValue = "excelente" | "muito_bom" | "bom" | "regular" | "nao_gostei";
+
 /** One Taster's complete response to one Pour. */
 export interface Impression {
   readonly pourId: string;
@@ -49,6 +65,7 @@ export interface Impression {
   readonly ratings: Readonly<Record<string, "low" | "high">>;
   readonly descriptors: readonly string[];
   readonly note: string;
+  readonly achei: AcheiValue | null;
   /**
    * A copy of the Pour's wine details, taken when the Impression was recorded.
    * This is what lets a Tasting outlive an Organizer removing the Pour, and it

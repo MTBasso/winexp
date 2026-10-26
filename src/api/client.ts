@@ -48,7 +48,9 @@ export class ApiError extends Error {
 async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   const passcode = getPasscode();
   const headers = new Headers(init.headers);
-  if (init.body) headers.set("Content-Type", "application/json");
+  // Only default to JSON when the caller hasn't already set its own
+  // Content-Type (e.g. the raw image/png upload below).
+  if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   if (passcode) headers.set("Authorization", `Bearer ${passcode}`);
 
   let response: Response;
@@ -66,7 +68,7 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await response.json()) as T;
 }
 
-export type PourInput = Omit<Pour, "id">;
+export type PourInput = Omit<Pour, "imageUrl">;
 
 export interface EventSummary {
   id: string;
@@ -98,6 +100,13 @@ export const putLineup = (id: string, pours: readonly PourInput[]) =>
     method: "PUT",
     body: JSON.stringify({ pours }),
   });
+
+/** Bottle photo upload (ticket: bottle images) — immediate, not autosaved. */
+export const uploadPourImage = (eventCode: string, pourId: string, file: File) =>
+  call<{ ok: true; imageKey: string }>(
+    `/api/events/${encodeURIComponent(eventCode)}/pours/${pourId}/image`,
+    { method: "PUT", headers: { "Content-Type": "image/png" }, body: file },
+  );
 
 /** Does the stored passcode still work? Cheapest authenticated call. */
 export const checkPasscode = async (): Promise<boolean> => {
