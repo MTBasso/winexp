@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Event, Pour } from "../domain/types";
 import { ApiError, fetchEvent } from "../api/client";
 import { isValidEventCode, normaliseEventCode } from "../domain/eventCode";
-import { cacheEvent, cachedEvent } from "./eventCache";
+import { cacheBottleImages, cacheEvent, cachedEvent } from "./eventCache";
 import { loadTasting, saveTasting, upsertImpression } from "./tasting";
 import type { Tasting } from "../domain/types";
 import type { RatingChange } from "./RatingSheet";
@@ -39,6 +39,7 @@ export function TasterApp({ rawCode }: { rawCode: string }) {
       .then((event) => {
         if (!live) return;
         cacheEvent(event);
+        void cacheBottleImages(event); // fire-and-forget: never blocks rendering
         setState({ kind: "ready", event, offline: false });
       })
       .catch((error: unknown) => {

@@ -12,7 +12,7 @@
  *     when the capture runs.
  */
 import type { Impression } from "../domain/types";
-import { AXES } from "../taster/content";
+import { ACHEI_SCALE, AXES } from "../taster/content";
 
 export const SLIDE_W = 1080;
 export const SLIDE_H = 1350;
@@ -75,13 +75,17 @@ export function CoverSlide({
 }
 
 export function PourSlide({
-  impression, index,
+  impression, index, imageUrl,
 }: {
   impression: Impression;
   index: number;
+  /** A pre-decoded blob URL resolved by ShareCard, never the raw server URL —
+   * never rendered via an `<img>` tag (see file header). */
+  imageUrl?: string | undefined;
 }) {
-  const { pour, note, descriptors, ratings } = impression;
+  const { pour, note, descriptors, ratings, achei } = impression;
   const answered = AXES.filter((a) => ratings[a.id]);
+  const acheiLabel = ACHEI_SCALE.find((a) => a.value === achei)?.label;
 
   return (
     <div style={frame}>
@@ -90,6 +94,16 @@ export function PourSlide({
           {String(index + 1).padStart(2, "0")}
           {pour.country ? ` · ${pour.country}` : ""}
         </div>
+
+        {imageUrl && (
+          <div
+            style={{
+              width: 140, height: 140, borderRadius: 10, marginTop: 28,
+              border: "2px solid #ddd2c4", backgroundImage: `url(${imageUrl})`,
+              backgroundSize: "cover", backgroundPosition: "center",
+            }}
+          />
+        )}
 
         <div style={{ fontFamily: SERIF, fontSize: pour.name.length > 22 ? 62 : 82, lineHeight: 1.1, color: INK, marginTop: 34 }}>
           {pour.name}
@@ -100,8 +114,14 @@ export function PourSlide({
           </div>
         )}
 
-        {answered.length > 0 && (
+        {(acheiLabel || answered.length > 0) && (
           <div style={{ borderTop: "2px solid #ddd2c4", marginTop: 54, paddingTop: 34, display: "grid", gap: 20 }}>
+            {acheiLabel && (
+              <div style={{ display: "flex", justifyContent: "space-between", fontFamily: SANS, fontSize: 27 }}>
+                <span style={{ color: FAINT }}>O que achou?</span>
+                <span style={{ color: INK, fontWeight: 700 }}>{acheiLabel}</span>
+              </div>
+            )}
             {answered.map((axis) => (
               <div key={axis.id} style={{ display: "flex", justifyContent: "space-between", fontFamily: SANS, fontSize: 27 }}>
                 <span style={{ color: FAINT }}>{axis.question}</span>

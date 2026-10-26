@@ -1,17 +1,21 @@
 /**
- * The rating screen settled by ticket 07: "ou / ou".
+ * The rating screen settled by ticket 07: "ou / ou", plus the Aroma Wheel and
+ * the 5-point "O que achei" scale.
  *
- * Each Axis is a two-way tap. Four taps make a complete Impression. There is
- * deliberately no middle value — the accepted trade recorded on ticket 07.
+ * Each Axis is a two-way tap. There is deliberately no middle value — the
+ * accepted trade recorded on ticket 07.
  */
-import type { Impression, Pour } from "../domain/types";
+import { useState } from "react";
+import type { AcheiValue, Impression, Pour } from "../domain/types";
 import { clampGraphemes, countGraphemes, NOTE_MAX_GRAPHEMES } from "../domain/text";
-import { AXES, DESCRIPTORS, MAX_DESCRIPTORS } from "./content";
+import { ACHEI_SCALE, AXES, MAX_DESCRIPTORS } from "./content";
+import { dimmedCategoryIds, visibleCategoriesForTipo } from "./aromaWheel";
 
 export interface RatingChange {
   ratings?: Impression["ratings"];
   descriptors?: string[];
   note?: string;
+  achei?: AcheiValue;
 }
 
 export function RatingSheet({
@@ -26,8 +30,11 @@ export function RatingSheet({
   const ratings = impression?.ratings ?? {};
   const descriptors = impression?.descriptors ?? [];
   const note = impression?.note ?? "";
+  const achei = impression?.achei ?? null;
   const used = countGraphemes(note);
   const full = descriptors.length >= MAX_DESCRIPTORS;
+
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const toggle = (d: string) =>
     onChange({
@@ -36,6 +43,9 @@ export function RatingSheet({
         : [...descriptors, d],
     });
 
+  const categories = visibleCategoriesForTipo(pour.tipo);
+  const dimmed = dimmedCategoryIds(descriptors);
+
   return (
     <div style={backdrop} onClick={onClose}>
       <div style={sheet} onClick={(e) => e.stopPropagation()}>
@@ -43,6 +53,29 @@ export function RatingSheet({
         <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 20 }}>{pour.name}</div>
 
         <div style={{ display: "grid", gap: 22 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>O que achou?</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {ACHEI_SCALE.map((opt) => {
+                const on = achei === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => onChange({ achei: opt.value })}
+                    style={{
+                      flex: "1 1 30%", minWidth: 100, padding: "14px 8px", borderRadius: 12,
+                      fontSize: 13.5, fontWeight: 600, color: "#fafaf9",
+                      border: `1px solid ${on ? "#7f1d1d" : "rgba(250,250,249,.22)"}`,
+                      background: on ? "#7f1d1d" : "transparent",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {AXES.map((axis) => (
             <div key={axis.id}>
               <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>{axis.question}</div>
@@ -70,29 +103,53 @@ export function RatingSheet({
 
           <div>
             <div style={{ fontSize: 13, color: "rgba(250,250,249,.6)", marginBottom: 10 }}>
-              Lembra de algum sabor? Toque em até {MAX_DESCRIPTORS}.
+              Lembra de algum aroma? Toque numa categoria e depois no termo. Até {MAX_DESCRIPTORS}.
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-              {DESCRIPTORS.map((d) => {
-                const on = descriptors.includes(d);
-                const dim = full && !on;
+              {categories.map((category) => {
+                const open = expanded === category.id;
+                const hasSelected = category.terms.some((t) => descriptors.includes(t));
+                const dim = dimmed.has(category.id) && !hasSelected;
                 return (
                   <button
-                    key={d}
-                    onClick={() => toggle(d)}
-                    disabled={dim}
+                    key={category.id}
+                    onClick={() => setExpanded(open ? null : category.id)}
                     style={{
                       padding: "8px 13px", borderRadius: 999, fontSize: 13,
-                      border: `1px solid ${on ? "#7f1d1d" : "rgba(250,250,249,.22)"}`,
-                      background: on ? "#7f1d1d" : "transparent",
-                      color: on ? "#fff" : dim ? "rgba(250,250,249,.25)" : "#fafaf9",
+                      border: `1px solid ${open || hasSelected ? "#7f1d1d" : "rgba(250,250,249,.22)"}`,
+                      background: open || hasSelected ? "#7f1d1d" : "transparent",
+                      color: open || hasSelected ? "#fff" : dim ? "rgba(250,250,249,.3)" : "#fafaf9",
                     }}
                   >
-                    {d}
+                    {category.label}
                   </button>
                 );
               })}
             </div>
+
+            {expanded && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 10 }}>
+                {categories.find((c) => c.id === expanded)?.terms.map((term) => {
+                  const on = descriptors.includes(term);
+                  const disabled = full && !on;
+                  return (
+                    <button
+                      key={term}
+                      onClick={() => toggle(term)}
+                      disabled={disabled}
+                      style={{
+                        padding: "8px 13px", borderRadius: 999, fontSize: 13,
+                        border: `1px solid ${on ? "#7f1d1d" : "rgba(250,250,249,.22)"}`,
+                        background: on ? "#7f1d1d" : "transparent",
+                        color: on ? "#fff" : disabled ? "rgba(250,250,249,.25)" : "#fafaf9",
+                      }}
+                    >
+                      {term}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div>

@@ -34,6 +34,10 @@ export function ShareCard({ event, tasting }: { event: Event; tasting: Tasting }
   const [phase, setPhase] = useState<Phase>({ kind: "empty" });
   const [shared, setShared] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
+  // pourId -> pre-decoded blob URL, resolved just before each Slide is
+  // captured (never a raw server URL, and never via an <img> tag — see
+  // Slides.tsx's header comment on the WebKit decode race).
+  const [resolvedImages, setResolvedImages] = useState<Readonly<Record<string, string>>>({});
 
   // Anything that changes a Slide invalidates the Carousel and forces a
   // re-render before sharing is possible again (ADR-0004).
@@ -55,7 +59,36 @@ export function ShareCard({ event, tasting }: { event: Event; tasting: Tasting }
     setPhase({ kind: "rendering", done: 0, total });
 
     const run = async () => {
-      // Wait for the stage to actually lay out before capturing it.
+      // Resolve every bottle image to a pre-decoded blob URL BEFORE capture
+      // starts. Each image gets its own try/catch: a failed fetch/decode
+      // degrades that one Slide to rendering with no image, never blocks or
+      // fails the whole Carousel.
+      const images: Record<string, string> = {};
+      for (const impression of carousel.impressions) {
+        const url = impression.pour.imageUrl;
+        if (!url) continue;
+        try {
+          let response: Response | undefined;
+          if (typeof caches !== "undefined") {
+            const cache = await caches.open("bottle-images").catch(() => null);
+            if (cache) response = await cache.match(url);
+          }
+          if (!response) response = await fetch(url);
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const img = new Image();
+          img.src = blobUrl;
+          await img.decode();
+          images[impression.pourId] = blobUrl;
+        } catch {
+          /* no image for this Slide; the Slide still renders fine without it */
+        }
+      }
+      if (!live) return;
+      setResolvedImages(images);
+      // Wait for the stage to actually lay out (and the new image styles to
+      // apply) before capturing it.
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
       await new Promise((r) => requestAnimationFrame(() => r(null)));
       const stage = stageRef.current;
       if (!stage) return;
@@ -225,7 +258,7 @@ export function ShareCard({ event, tasting }: { event: Event; tasting: Tasting }
         )}
         {carousel.impressions.map((impression, index) => (
           <div data-slide={impression.pourId} key={impression.pourId}>
-            <PourSlide impression={impression} index={index} />
+            <PourSlide impression={impression} index={index} imageUrl={resolvedImages[impression.pourId]} />
           </div>
         ))}
       </div>

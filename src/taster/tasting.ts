@@ -12,8 +12,11 @@
  *
  * Parsing is pure and takes raw JSON, so it is testable without localStorage.
  */
-import type { Impression, Pour, PourDetails, Tasting } from "../domain/types";
+import type { AcheiValue, Impression, Pour, PourDetails, Tasting } from "../domain/types";
 import { TASTING_VERSION } from "../domain/types";
+import { ACHEI_SCALE } from "./content";
+
+const ACHEI_VALUES = new Set(ACHEI_SCALE.map((a) => a.value));
 
 export const storageKey = (eventCode: string) => `tasting:${eventCode}`;
 
@@ -30,6 +33,8 @@ export const detailsOf = (pour: Pour): PourDetails => ({
   vintage: pour.vintage,
   grape: pour.grape,
   country: pour.country,
+  tipo: pour.tipo,
+  imageUrl: pour.imageUrl,
 });
 
 /** An Impression counts as started once the Taster has said anything at all. */
@@ -37,7 +42,8 @@ export const isStarted = (impression: Impression | undefined): boolean =>
   !!impression &&
   (Object.keys(impression.ratings).length > 0 ||
     impression.descriptors.length > 0 ||
-    impression.note.trim().length > 0);
+    impression.note.trim().length > 0 ||
+    impression.achei !== null);
 
 export const ratedCount = (tasting: Tasting): number =>
   Object.values(tasting.impressions).filter(isStarted).length;
@@ -62,17 +68,24 @@ function parseImpression(raw: unknown, pourId: string): Impression | null {
     : {}) as Record<string, unknown>;
   const str = (v: unknown) => (typeof v === "string" ? v : "");
 
+  const achei = typeof r["achei"] === "string" && ACHEI_VALUES.has(r["achei"] as AcheiValue)
+    ? (r["achei"] as AcheiValue)
+    : null;
+
   return {
     pourId,
     ratings,
     descriptors,
     note: typeof r["note"] === "string" ? r["note"] : "",
+    achei,
     pour: {
       name: str(pourRaw["name"]),
       producer: str(pourRaw["producer"]),
       vintage: str(pourRaw["vintage"]),
       grape: str(pourRaw["grape"]),
       country: str(pourRaw["country"]),
+      tipo: typeof pourRaw["tipo"] === "string" ? (pourRaw["tipo"] as PourDetails["tipo"]) : "Outro",
+      imageUrl: typeof pourRaw["imageUrl"] === "string" ? pourRaw["imageUrl"] : null,
     },
   };
 }
@@ -132,7 +145,7 @@ export function saveTasting(tasting: Tasting): void {
 export function upsertImpression(
   tasting: Tasting,
   pour: Pour,
-  change: Partial<Pick<Impression, "ratings" | "descriptors" | "note">>,
+  change: Partial<Pick<Impression, "ratings" | "descriptors" | "note" | "achei">>,
 ): Tasting {
   const existing = tasting.impressions[pour.id];
   const next: Impression = {
@@ -140,6 +153,7 @@ export function upsertImpression(
     ratings: change.ratings ?? existing?.ratings ?? {},
     descriptors: change.descriptors ?? existing?.descriptors ?? [],
     note: change.note ?? existing?.note ?? "",
+    achei: change.achei ?? existing?.achei ?? null,
     // Refreshed every time, so a corrected vintage reaches the Carousel.
     pour: detailsOf(pour),
   };

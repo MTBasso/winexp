@@ -26,3 +26,28 @@ export function cachedEvent(code: string): Event | null {
     return null;
   }
 }
+
+const BOTTLE_IMAGE_CACHE = "bottle-images";
+
+/**
+ * A parallel image-caching path, deliberately NOT going through
+ * localStorage above — an 8MB PNG would blow that quota. Uses the Cache API
+ * instead. Best-effort: one failed image must never break caching the rest.
+ */
+export async function cacheBottleImages(event: Event): Promise<void> {
+  if (typeof caches === "undefined") return;
+  let cache: Cache;
+  try {
+    cache = await caches.open(BOTTLE_IMAGE_CACHE);
+  } catch {
+    return; // private mode or unsupported: the Taster just needs the network to stay up
+  }
+  for (const pour of event.lineup) {
+    if (!pour.imageUrl) continue;
+    try {
+      await cache.add(pour.imageUrl);
+    } catch {
+      /* one bad image must not break caching the rest */
+    }
+  }
+}

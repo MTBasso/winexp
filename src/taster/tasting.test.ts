@@ -8,7 +8,7 @@ import {
 
 const pour = (id: string, position: number, name = `Vinho ${position}`): Pour => ({
   id, position, name, producer: "Quinta", vintage: "2020",
-  grape: "Touriga", country: "Portugal",
+  grape: "Touriga", country: "Portugal", tipo: "Tinto", imageUrl: null,
 });
 
 describe("storageKey", () => {
@@ -62,7 +62,7 @@ describe("parseTasting", () => {
       eventCode: "TESTE1", impressions: { p1: { note: "oi" } },
     }, "TESTE1");
     expect(parsed.impressions["p1"]?.pour).toEqual({
-      name: "", producer: "", vintage: "", grape: "", country: "",
+      name: "", producer: "", vintage: "", grape: "", country: "", tipo: "Outro", imageUrl: null,
     });
   });
 
@@ -72,7 +72,7 @@ describe("parseTasting", () => {
 });
 
 describe("isStarted", () => {
-  const base = { pourId: "p1", ratings: {}, descriptors: [], note: "", pour: {} as never };
+  const base = { pourId: "p1", ratings: {}, descriptors: [], note: "", achei: null, pour: {} as never };
 
   it("is false for an untouched Impression", () => {
     expect(isStarted(undefined)).toBe(false);
@@ -87,6 +87,7 @@ describe("isStarted", () => {
     expect(isStarted({ ...base, ratings: { gostei: "high" } })).toBe(true);
     expect(isStarted({ ...base, descriptors: ["mel"] })).toBe(true);
     expect(isStarted({ ...base, note: "bom" })).toBe(true);
+    expect(isStarted({ ...base, achei: "bom" as const })).toBe(true);
   });
 });
 

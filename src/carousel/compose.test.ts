@@ -5,10 +5,14 @@ import { composeCarousel, MAX_FILES, slideCount } from "./compose";
 const impressions = (n: number): Impression[] =>
   Array.from({ length: n }, (_, i) => ({
     pourId: `p${i + 1}`,
-    ratings: { gostei: "high" as const },
+    ratings: { denovo: "high" as const },
     descriptors: [],
     note: `nota ${i + 1}`,
-    pour: { name: `Vinho ${i + 1}`, producer: "", vintage: "", grape: "", country: "" },
+    achei: "bom" as const,
+    pour: {
+      name: `Vinho ${i + 1}`, producer: "", vintage: "", grape: "", country: "",
+      tipo: "Outro" as const, imageUrl: null,
+    },
   }));
 
 describe("composeCarousel", () => {

@@ -31,6 +31,34 @@ export function Field({
   );
 }
 
+export function Select<T extends string>({
+  label, value, onChange, options, wide,
+}: {
+  label: string;
+  value: T;
+  onChange: (v: T) => void;
+  options: readonly { value: T; label: string }[];
+  wide?: boolean;
+}) {
+  return (
+    <label style={{ display: "block", gridColumn: wide ? "1 / -1" : undefined }}>
+      <span style={{ display: "block", fontSize: 11.5, color: O.mut, marginBottom: 5 }}>{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as T)}
+        style={{
+          width: "100%", padding: "11px 12px", fontSize: 15,
+          borderRadius: 9, border: `1px solid ${O.line}`, background: "#fff",
+        }}
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 /**
  * An Organizer at a venue needs to know their list is safe, so saving is a
  * visible state — including when it fails.
