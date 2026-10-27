@@ -34,9 +34,16 @@ export function Deck({
   const total = lineup.length + 2;
   const pour = card >= 1 && card <= lineup.length ? lineup[card - 1] : undefined;
   const impression: Impression | undefined = rating ? tasting.impressions[rating.id] : undefined;
+  // The backdrop behind both the Pour card and the open RatingSheet drawer —
+  // only the currently-displayed Pour's image, and only while it has one.
+  // The drawer itself (RatingSheet.tsx's `sheet`) is unaffected: it renders
+  // on top of this, unchanged.
+  const backdropImageUrl = pour?.imageUrl;
 
   return (
-    <div style={page}>
+    <div style={backdropImageUrl ? pageWithImage(backdropImageUrl) : page}>
+      {backdropImageUrl && <div style={pageOverlay} />}
+      <div style={pageContent}>
       <div style={{ display: "flex", gap: 4, padding: "18px 18px 0" }}>
         {Array.from({ length: total }).map((_, n) => (
           <span key={n} style={{
@@ -125,6 +132,7 @@ export function Deck({
           onDone={() => { setRating(null); setCard((n) => Math.min(total - 1, n + 1)); }}
         />
       )}
+      </div>
     </div>
   );
 }
@@ -132,6 +140,34 @@ export function Deck({
 const page: React.CSSProperties = {
   background: "#1c1917", minHeight: "100vh", color: "#fafaf9",
   display: "flex", flexDirection: "column", fontFamily: "system-ui, sans-serif",
+  position: "relative",
+};
+// Full-bleed bottle backdrop behind the Pour card / open RatingSheet drawer,
+// for whichever Pour is currently displayed. Same heavy top+bottom gradient
+// approach as the Carousel Slide (Slides.tsx) — tuned the same way, since a
+// real Organizer's upload is likely a plain white-background product photo.
+const pageWithImage = (imageUrl: string): React.CSSProperties => ({
+  ...page,
+  backgroundImage: `url(${imageUrl})`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+});
+// Wraps everything else rendered inside `page` (progress bar, header, Pour
+// card, nav buttons, and the RatingSheet overlay). Being `position: relative`
+// makes it a positioned sibling to `pageOverlay`, so DOM order correctly
+// decides paint order between them (matching Slides.tsx's PourSlide, which
+// has the equivalent full-bleed overlay without this stacking bug) — without
+// this, `pageOverlay`'s `position: absolute` with no z-index would paint on
+// top of the static in-flow content regardless of DOM order, swallowing
+// clicks.
+const pageContent: React.CSSProperties = {
+  position: "relative",
+  display: "flex", flexDirection: "column", flex: 1,
+};
+const pageOverlay: React.CSSProperties = {
+  position: "absolute", inset: 0,
+  backgroundImage:
+    "linear-gradient(to bottom, rgba(10,8,7,.92) 0%, rgba(10,8,7,.68) 22%, rgba(10,8,7,.4) 45%, rgba(10,8,7,.62) 68%, rgba(10,8,7,.94) 100%)",
 };
 const lightBtn: React.CSSProperties = {
   width: "100%", padding: 15, borderRadius: 12, border: 0,
