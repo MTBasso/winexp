@@ -236,12 +236,20 @@ export function ShareCard({ event, tasting }: { event: Event; tasting: Tasting }
       {/*
         The stage. Rendered off-screen rather than hidden: snapdom needs real
         layout, so display:none would produce blank Slides.
+        `position: fixed` (not "absolute") is deliberate: this stage can be
+        several thousand px tall (SLIDE_H * total slides), and an absolutely
+        positioned element still contributes to the document's scrollable
+        overflow even when shifted far off-screen via `left`, which made the
+        whole page scroll into acres of blank space once this mounted. Fixed
+        positioning is relative to the viewport and never expands document
+        scroll/layout bounds, while still giving snapdom the real layout it
+        needs to capture.
       */}
       <div
         ref={stageRef}
         aria-hidden
         style={{
-          position: "absolute", left: -20000, top: 0,
+          position: "fixed", left: -20000, top: 0,
           width: SLIDE_W, height: SLIDE_H * Math.max(total, 1),
           pointerEvents: "none",
         }}
