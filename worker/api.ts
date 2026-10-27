@@ -150,25 +150,47 @@ export function parseLineupInput(body: unknown): PourInput[] | { error: string }
 /** PNG magic bytes: 89 50 4E 47 — sniffed, not trusted from Content-Type alone. */
 const PNG_MAGIC = [0x89, 0x50, 0x4e, 0x47];
 
+/**
+ * WebP is a RIFF container: `RIFF` at offset 0, then a 4-byte chunk size,
+ * then the container's chunk type `WEBP` at offset 8 — sniffed the same way
+ * as the PNG signature, not trusted from Content-Type alone.
+ */
+const RIFF_MAGIC = [0x52, 0x49, 0x46, 0x46];
+const WEBP_MAGIC = [0x57, 0x45, 0x42, 0x50];
+const WEBP_MAGIC_OFFSET = 8;
+
 /** 8MB (ticket: bottle PNG upload) — see TECH_LEAD_MEMORY for why not 3MB. */
 export const MAX_PNG_BYTES = 8 * 1024 * 1024;
+
+export type ImageContentType = "image/png" | "image/webp";
+
+const hasMagic = (bytes: Uint8Array, magic: readonly number[], offset = 0): boolean =>
+  bytes.length >= offset + magic.length && magic.every((byte, index) => bytes[offset + index] === byte);
 
 /**
  * Pure so it's unit-testable without a real request/R2. `contentType` is
  * checked as a fast, cheap signal; the magic-byte sniff is what's actually
- * trusted against the upload being a PNG.
+ * trusted against the upload being a PNG or WebP — the sniffed type (not the
+ * client-sent header) is what callers should persist.
  */
-export function validatePngUpload(
+export function validateImageUpload(
   bytes: Uint8Array,
   contentType: string | null,
-): { ok: true } | { error: string } {
-  if (contentType !== "image/png") return { error: "Tipo de ficheiro inválido" };
-  if (bytes.length > MAX_PNG_BYTES) return { error: "Imagem demasiado grande" };
-  const hasPngMagic = PNG_MAGIC.every((byte, index) => bytes[index] === byte);
-  if (bytes.length < PNG_MAGIC.length || !hasPngMagic) {
-    return { error: "Ficheiro não é um PNG válido" };
+): { ok: true; contentType: ImageContentType } | { error: string } {
+  if (contentType !== "image/png" && contentType !== "image/webp") {
+    return { error: "Tipo de ficheiro inválido" };
   }
-  return { ok: true };
+  if (bytes.length > MAX_PNG_BYTES) return { error: "Imagem demasiado grande" };
+
+  if (contentType === "image/png") {
+    if (!hasMagic(bytes, PNG_MAGIC)) return { error: "Ficheiro não é um PNG válido" };
+    return { ok: true, contentType: "image/png" };
+  }
+
+  if (!hasMagic(bytes, RIFF_MAGIC) || !hasMagic(bytes, WEBP_MAGIC, WEBP_MAGIC_OFFSET)) {
+    return { error: "Ficheiro não é um WebP válido" };
+  }
+  return { ok: true, contentType: "image/webp" };
 }
 
 export const json = (data: unknown, status = 200) =>

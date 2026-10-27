@@ -4,7 +4,7 @@ import {
   parseEventInput,
   parseLineupInput,
   toEvent,
-  validatePngUpload,
+  validateImageUpload,
   type PourRow,
 } from "./api";
 
@@ -16,6 +16,11 @@ const row = (over: Partial<PourRow> = {}): PourRow => ({
 });
 
 const PNG_HEADER = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+// RIFF container (bytes 0-3) + arbitrary chunk size (4-7) + WEBP chunk type (8-11).
+const WEBP_HEADER = new Uint8Array([
+  0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+]);
 
 describe("isAuthorised", () => {
   it("accepts the right passcode as a bearer token", () => {
@@ -129,25 +134,44 @@ describe("parseLineupInput", () => {
   });
 });
 
-describe("validatePngUpload", () => {
-  it("accepts a correctly-typed, correctly-signed, small file", () => {
-    expect(validatePngUpload(PNG_HEADER, "image/png")).toEqual({ ok: true });
+describe("validateImageUpload", () => {
+  it("accepts a correctly-typed, correctly-signed, small PNG", () => {
+    expect(validateImageUpload(PNG_HEADER, "image/png")).toEqual({ ok: true, contentType: "image/png" });
   });
 
-  it("rejects a non-PNG content type even if the bytes look right", () => {
-    expect(validatePngUpload(PNG_HEADER, "image/jpeg")).toHaveProperty("error");
-    expect(validatePngUpload(PNG_HEADER, null)).toHaveProperty("error");
+  it("accepts a correctly-typed, correctly-signed, small WebP", () => {
+    expect(validateImageUpload(WEBP_HEADER, "image/webp")).toEqual({ ok: true, contentType: "image/webp" });
+  });
+
+  it("rejects a content type that isn't PNG or WebP even if the bytes look right", () => {
+    expect(validateImageUpload(PNG_HEADER, "image/jpeg")).toHaveProperty("error");
+    expect(validateImageUpload(PNG_HEADER, null)).toHaveProperty("error");
   });
 
   it("rejects bytes that don't start with the PNG signature", () => {
     const notPng = new Uint8Array([0x00, 0x01, 0x02, 0x03]);
-    expect(validatePngUpload(notPng, "image/png")).toHaveProperty("error");
+    expect(validateImageUpload(notPng, "image/png")).toHaveProperty("error");
   });
 
-  it("rejects a file over the 8MB cap", () => {
+  it("rejects bytes that don't carry the RIFF/WEBP signature", () => {
+    const notWebp = new Uint8Array([0x00, 0x01, 0x02, 0x03]);
+    expect(validateImageUpload(notWebp, "image/webp")).toHaveProperty("error");
+  });
+
+  it("rejects a Content-Type/bytes mismatch (PNG header declared as WebP)", () => {
+    expect(validateImageUpload(PNG_HEADER, "image/webp")).toHaveProperty("error");
+  });
+
+  it("rejects a PNG over the 8MB cap", () => {
     const tooBig = new Uint8Array(8 * 1024 * 1024 + 1);
     tooBig.set(PNG_HEADER);
-    expect(validatePngUpload(tooBig, "image/png")).toHaveProperty("error");
+    expect(validateImageUpload(tooBig, "image/png")).toHaveProperty("error");
+  });
+
+  it("rejects a WebP over the 8MB cap", () => {
+    const tooBig = new Uint8Array(8 * 1024 * 1024 + 1);
+    tooBig.set(WEBP_HEADER);
+    expect(validateImageUpload(tooBig, "image/webp")).toHaveProperty("error");
   });
 });
 

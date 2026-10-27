@@ -16,7 +16,7 @@ import {
   parseEventInput,
   parseLineupInput,
   toEvent,
-  validatePngUpload,
+  validateImageUpload,
   type EventRow,
   type PourRow,
 } from "./api";
@@ -224,7 +224,7 @@ async function getPourImage(env: Env, rawCode: string, pourId: string): Promise<
 
   return new Response(object.body, {
     headers: {
-      "Content-Type": "image/png",
+      "Content-Type": object.httpMetadata?.contentType ?? "image/png",
       // Safe to cache forever: the key changes on every reupload.
       "Cache-Control": "public, max-age=31536000, immutable",
     },
@@ -255,11 +255,14 @@ async function putPourImage(
   }
 
   const bytes = new Uint8Array(await request.arrayBuffer());
-  const validated = validatePngUpload(bytes, request.headers.get("Content-Type"));
+  const validated = validateImageUpload(bytes, request.headers.get("Content-Type"));
   if ("error" in validated) return fail(validated.error, 400);
 
-  const key = `${pourId}-${Date.now()}.png`;
-  await env.BOTTLE_IMAGES.put(key, bytes, { httpMetadata: { contentType: "image/png" } });
+  // Extension and stored metadata both come from the sniffed type, not the
+  // client-sent header, so neither the key nor R2's metadata can be spoofed.
+  const extension = validated.contentType === "image/webp" ? "webp" : "png";
+  const key = `${pourId}-${Date.now()}.${extension}`;
+  await env.BOTTLE_IMAGES.put(key, bytes, { httpMetadata: { contentType: validated.contentType } });
 
   const result = await env.DB.prepare(
     "UPDATE pours SET image_key = ? WHERE id = ? AND event_id = ?",

@@ -49,7 +49,8 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   const passcode = getPasscode();
   const headers = new Headers(init.headers);
   // Only default to JSON when the caller hasn't already set its own
-  // Content-Type (e.g. the raw image/png upload below).
+  // Content-Type (e.g. the raw image upload below, which sends the file's
+  // real MIME type).
   if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   if (passcode) headers.set("Authorization", `Bearer ${passcode}`);
 
@@ -105,7 +106,7 @@ export const putLineup = (id: string, pours: readonly PourInput[]) =>
 export const uploadPourImage = (eventCode: string, pourId: string, file: File) =>
   call<{ ok: true; imageKey: string }>(
     `/api/events/${encodeURIComponent(eventCode)}/pours/${pourId}/image`,
-    { method: "PUT", headers: { "Content-Type": "image/png" }, body: file },
+    { method: "PUT", headers: { "Content-Type": file.type }, body: file },
   );
 
 /** Does the stored passcode still work? Cheapest authenticated call. */

@@ -147,8 +147,8 @@ export function OrganizerAdmin() {
   const uploadImage = async (p: Draft, file: File) => {
     if (!event) return;
     setImageError(null);
-    if (file.type !== "image/png") {
-      setImageError("Envie um arquivo PNG.");
+    if (file.type !== "image/png" && file.type !== "image/webp") {
+      setImageError("Envie um arquivo PNG ou WebP.");
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
@@ -303,7 +303,7 @@ export function OrganizerAdmin() {
                       {p.imageUrl ? "Trocar foto" : "Adicionar foto"}
                       <input
                         type="file"
-                        accept="image/png"
+                        accept="image/png,image/webp"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           e.target.value = "";
